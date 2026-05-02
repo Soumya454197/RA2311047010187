@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Campus Notification Platform
 
-## Getting Started
+A full-stack notification system built for a campus environment where students stay updated on Placements, Results, and Events — in real time, with smart priority ordering.
 
-First, run the development server:
+---
+
+## What this does
+
+Ever missed an important placement drive because it got buried under event notifications? This app fixes that.
+
+It pulls in all campus notifications and lets you:
+- See everything in one place
+- Filter by type (Placement, Result, Event)
+- View a **Priority Inbox** that always surfaces the most important notifications first
+- Track which notifications you've already seen
+
+New notifications are highlighted in blue. Once you click them, they're marked as read.
+
+---
+
+## Priority Logic
+
+Not all notifications are equal. The app ranks them by:
+
+1. **Type weight** — Placements matter most, then Results, then Events
+2. **Recency** — newer notifications rank higher within the same type
+
+This means a fresh Placement alert will always appear above an older Event, even if the Event came in recently.
+
+---
+
+## Project Structure
+ra2311047010187/
+├── logging_middleware/        # Reusable logging package
+│   └── index.ts               # Log(stack, level, package, message)
+│
+├── notification_app_fe/       # Next.js frontend
+│   ├── app/
+│   │   ├── page.tsx           # Main UI — All Notifications + Priority Inbox
+│   │   ├── layout.tsx         # App shell
+│   │   ├── registry.tsx       # MUI SSR fix
+│   │   └── api/
+│   │       ├── notifications/ # Proxy route for notifications API
+│   │       └── logs/          # Proxy route for logging API
+│   └── lib/
+│       ├── api.ts             # Fetch notifications, priority scoring
+│       └── logger.ts          # Log function wrapper
+│
+├── notification_app_be/       # Backend (placeholder)
+└── Notification_System_Design.md  # Architecture + Stage 1 write-up
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router, TypeScript)
+- **UI**: Material UI
+- **Logging**: Custom middleware that sends structured logs to the evaluation server
+- **API**: REST — fetches live notifications from the campus backend
+
+---
+
+## Running locally
 
 ```bash
+cd notification_app_fe
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Logging
 
-## Learn More
+Every meaningful action in the app is logged — page loads, API failures, filter changes, notification views. Logs are sent to the evaluation server with this structure:
+Log(stack, level, package, message)
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Example:
+```typescript
+Log("frontend", "info", "page", "Fetched 10 notifications successfully")
+Log("frontend", "error", "page", "Failed to fetch notifications from API")
+```
